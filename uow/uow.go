@@ -14,7 +14,7 @@ var (
 	ErrExistsTransaction = errors.New("uow: transaction already active; nested transactions are not supported")
 )
 
-type TxFunc func(ctx context.Context, uow *UnitOfWork) error
+type TxFunc func(ctx context.Context, unit *UnitOfWork) error
 
 type UnitOfWork struct {
 	db *sql.DB
