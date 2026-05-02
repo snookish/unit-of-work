@@ -20,7 +20,7 @@ func NewUserService(u *uow.UnitOfWork) *UserService {
 func (s *UserService) CreateUser(ctx context.Context, firstName, lastName, email string) (*models.User, error) {
 	u := &models.User{Email: email, FirstName: firstName, LastName: lastName}
 
-	err := s.uow.WithTx(ctx, nil, func(ctx context.Context, unit *uow.UnitOfWork) error {
+	if err := s.uow.WithTx(ctx, nil, func(ctx context.Context, unit *uow.UnitOfWork) error {
 		tx, err := unit.Tx()
 		if err != nil {
 			return err
@@ -32,15 +32,12 @@ func (s *UserService) CreateUser(ctx context.Context, firstName, lastName, email
 			return fmt.Errorf("create user: %w", err)
 		}
 
-		log := &models.AuditLog{UserID: u.ID, Action: "user.created"}
-		if err := repos.AuditLogs.Create(ctx, log); err != nil {
+		if err := repos.AuditLogs.Create(ctx, &models.AuditLog{UserID: u.ID, Action: "user.created"}); err != nil {
 			return fmt.Errorf("create audit log: %w", err)
 		}
 
 		return nil
-	})
-
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
 
