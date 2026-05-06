@@ -94,8 +94,10 @@ func (uow *UnitOfWork) WithTx(ctx context.Context, options *sql.TxOptions, fn Tx
 		}
 	}()
 
-	if err := fn(ctx, uow); err != nil {
+	if err = fn(ctx, uow); err != nil {
 		return err
 	}
-	return uow.Commit()
+
+	err = uow.Commit()
+	return err
 }
